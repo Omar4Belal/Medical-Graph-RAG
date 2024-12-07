@@ -1,11 +1,11 @@
 from langchain.output_parsers.openai_tools import JsonOutputToolsParser
-from langchain_community.chat_models import ChatOpenAI
+from langchain_community.chat_models import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain.chains import create_extraction_chain
 from typing import Optional, List
 from langchain.chains import create_extraction_chain_pydantic
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 from langchain import hub
 import os
 from dataloader import load_high
@@ -27,7 +27,14 @@ def get_propositions(text, runnable, extraction_chain):
 def run_chunk(essay):
 
     obj = hub.pull("wfh/proposal-indexing")
-    llm = ChatOpenAI(model='gpt-4o-mini', openai_api_key = os.getenv("OPENAI_API_KEY"))
+    #llm = ChatOpenAI(model='gpt-4o-mini', openai_api_key = os.getenv("OPENAI_API_KEY"))
+    # Use Azure OpenAI
+    llm = AzureChatOpenAI(
+        model="gpt-4o-mini",
+        azure_openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"), 
+        azure_openai_api_version="2024-07-18", 
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+    )
 
     runnable = obj | llm
 
