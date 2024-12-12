@@ -6,6 +6,8 @@ from camel.storages import Neo4jGraph
 import uuid
 from summerize import process_chunks
 import openai
+from openai import AzureOpenAI
+from langchain_openai import AzureChatOpenAI
 
 sys_prompt_one = """
 Please answer the question using insights supported by provided graph-based data relevant to medical information.
@@ -15,12 +17,17 @@ sys_prompt_two = """
 Modify the response to the question using the provided references. Include precise citations relevant to your answer. You may use multiple citations simultaneously, denoting each with the reference index number. For example, cite the first and third documents as [1][3]. If the references do not pertain to the response, simply provide a concise answer to the original question.
 """
 
-# Add your own OpenAI API key
-openai_api_key = os.getenv("OPENAI_API_KEY")
+azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+azure_api_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 def get_embedding(text, mod = "text-embedding-3-small"):
-    client = OpenAI(api_key = os.getenv("OPENAI_API_KEY"))
-
+    client = AzureChatOpenAI(
+        model_name="gpt-4o-mini", 
+        api_key=azure_openai_api_key,
+        api_version="2024-08-01-preview",
+        azure_endpoint=azure_api_endpoint,
+        azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME")
+    )
     response = client.embeddings.create(
         input=text,
         model=mod
@@ -80,7 +87,7 @@ def add_sum(n4j,content,gid):
     return s
 
 def call_llm(sys, user):
-    response = openai.chat.completions.create(
+    response = AzureOpenAI.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": sys},

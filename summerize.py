@@ -2,6 +2,8 @@ import openai
 from concurrent.futures import ThreadPoolExecutor
 import tiktoken
 import os
+from openai import AzureOpenAI
+from langchain_openai import AzureChatOpenAI
 
 # Add your own OpenAI API key
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -31,19 +33,24 @@ SUBSTANCE_ABUSE: Note any substance abuse mentioned.
 Each category should be addressed only if relevant to the content of the medical source. Ensure the summary is clear and direct, suitable for quick reference.
 """
 
+azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+azure_api_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+llm = AzureChatOpenAI(
+        model_name="gpt-4o-mini", 
+        api_key=azure_openai_api_key,
+        api_version="2024-08-01-preview",
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME"),
+        temperature=0.5 
+    )
+
 def call_openai_api(chunk):
-    response = openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
+    response = llm.invoke([
             {"role": "system", "content": sum_prompt},
             {"role": "user", "content": f" {chunk}"},
-        ],
-        max_tokens=500,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-    return response.choices[0].message.content
+        ])
+    return response.content
 
 def split_into_chunks(text, tokens=500):
     encoding = tiktoken.encoding_for_model('gpt-4-1106-preview')
@@ -63,7 +70,7 @@ def process_chunks(content):
     return responses
 
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     content = " sth you wanna test"
     process_chunks(content)
 

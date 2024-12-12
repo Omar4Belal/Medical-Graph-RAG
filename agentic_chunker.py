@@ -1,16 +1,16 @@
+from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 import uuid
-from langchain.chat_models import ChatOpenAI
 import os
 from typing import Optional
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 from langchain.chains import create_extraction_chain_pydantic
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class AgenticChunker:
-    def __init__(self, openai_api_key=None):
+    def __init__(self, azure_openai_api_key=None):
         self.chunks = {}
         self.id_truncate_limit = 5
 
@@ -18,14 +18,25 @@ class AgenticChunker:
         self.generate_new_metadata_ind = True
         self.print_logging = True
 
-        if openai_api_key is None:
-            openai_api_key = os.getenv("OPENAI_API_KEY")
+        # Load API credentials from environment variables if not provided
+        if azure_openai_api_key is None:
+            azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        
+        # Ensure API key is provided
+        if not azure_openai_api_key:
+            raise ValueError("Azure OpenAI API key must be provided or set in environment variables")
 
-        if openai_api_key is None:
-            raise ValueError("API key is not provided and not found in environment variables")
+        # model for text extraction
+        self.llm = AzureChatOpenAI(
+            model_name="gpt-4o-mini", 
+            api_key=azure_openai_api_key,
+            api_version="2024-08-01-preview",
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME"),
+            temperature=0  
+        )
 
-        self.llm = ChatOpenAI(model='gpt-4o-mini', openai_api_key=openai_api_key, temperature=0)
-
+    # allows batch addition of propositions, while add_proposition handles each one individually.
     def add_propositions(self, propositions):
         for proposition in propositions:
             self.add_proposition(proposition)
