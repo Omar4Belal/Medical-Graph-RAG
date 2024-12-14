@@ -34,15 +34,16 @@ Each category should be addressed only if relevant to the content of the medical
 """
 
 azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-azure_api_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+azure_deployment = os.getenv("AZURE_DEPLOYMENT_NAME")
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 llm = AzureChatOpenAI(
-        model_name="gpt-4o-mini", 
-        api_key=azure_openai_api_key,
-        api_version="2024-08-01-preview",
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME"),
-        temperature=0.5 
+            model="gpt-4o-mini", 
+            api_key=azure_openai_api_key,
+            api_version="2024-08-01-preview",
+            azure_endpoint=azure_endpoint,
+            azure_deployment=azure_deployment,
+            temperature=0.5
     )
 
 def call_openai_api(chunk):
@@ -53,11 +54,12 @@ def call_openai_api(chunk):
     return response.content
 
 def split_into_chunks(text, tokens=500):
-    encoding = tiktoken.encoding_for_model('gpt-4-1106-preview')
+    encoding = tiktoken.encoding_for_model('gpt-4o-mini')
     words = encoding.encode(text)
     chunks = []
     for i in range(0, len(words), tokens):
         chunks.append(' '.join(encoding.decode(words[i:i + tokens])))
+    print(f"chunks = {chunks}")
     return chunks   
 
 def process_chunks(content):
@@ -70,8 +72,9 @@ def process_chunks(content):
     return responses
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     content = " sth you wanna test"
     process_chunks(content)
+    print(f"DONE")
 
 # Can take up to a few minutes to run depending on the size of your data input

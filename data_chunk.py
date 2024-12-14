@@ -1,5 +1,5 @@
 from langchain.output_parsers.openai_tools import JsonOutputToolsParser
-from langchain_community.chat_models import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain.chains import create_extraction_chain
@@ -31,12 +31,16 @@ def run_chunk(essay):
     obj = hub.pull("wfh/proposal-indexing")
     #llm = ChatOpenAI(model='gpt-4o-mini', openai_api_key = os.getenv("OPENAI_API_KEY"))
     # Use Azure OpenAI
+    azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_deployment = os.getenv("AZURE_DEPLOYMENT_NAME")
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+
     llm = AzureChatOpenAI(
-        model="gpt-4o-mini",
-        api_key=os.getenv("AZURE_OPENAI_API_KEY"), 
-        api_version="2024-08-01-preview", 
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME")
+            model="gpt-4o-mini", 
+            api_key=azure_openai_api_key,
+            api_version="2024-08-01-preview",
+            azure_endpoint=azure_endpoint,
+            azure_deployment=azure_deployment
     )
 
     runnable = obj | llm
@@ -61,3 +65,4 @@ def run_chunk(essay):
 
     return chunks
     print(chunks)
+

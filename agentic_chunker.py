@@ -1,5 +1,5 @@
 from langchain_openai import AzureChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate
 import uuid
 import os
 from typing import Optional
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class AgenticChunker:
-    def __init__(self, azure_openai_api_key=None):
+    def __init__(self, azure_openai_api_key=None, azure_deployment=None, azure_endpoint=None):
         self.chunks = {}
         self.id_truncate_limit = 5
 
@@ -22,20 +22,32 @@ class AgenticChunker:
         if azure_openai_api_key is None:
             azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
         
+        if azure_deployment is None:
+            azure_deployment = os.getenv("AZURE_DEPLOYMENT_NAME")
+
+        if azure_endpoint is None:
+            azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        # Ensure API key is provided
+        if not azure_endpoint:
+            raise ValueError("Azure OpenAI ENDPOINT must be provided or set in environment variables")
+        
         # Ensure API key is provided
         if not azure_openai_api_key:
             raise ValueError("Azure OpenAI API key must be provided or set in environment variables")
-
+        
+        if not azure_deployment:
+            raise ValueError("Azure deployment name must be provided or set in environment variables")
+        
         # model for text extraction
         self.llm = AzureChatOpenAI(
-            model_name="gpt-4o-mini", 
+            model="gpt-4o-mini", 
             api_key=azure_openai_api_key,
             api_version="2024-08-01-preview",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME"),
-            temperature=0  
+            azure_endpoint=azure_endpoint,
+            azure_deployment=azure_deployment
         )
 
+        print(f"FINISHED INITIALIZING LLM WITHOUT ERRORS")
     # allows batch addition of propositions, while add_proposition handles each one individually.
     def add_propositions(self, propositions):
         for proposition in propositions:
@@ -228,7 +240,9 @@ class AgenticChunker:
 
     def _create_new_chunk(self, proposition):
         new_chunk_id = str(uuid.uuid4())[:self.id_truncate_limit] # I don't want long ids
+        print(f"new chunk id = {new_chunk_id}")
         new_chunk_summary = self._get_new_chunk_summary(proposition)
+        print(f"summary {new_chunk_summary}")
         new_chunk_title = self._get_new_chunk_title(new_chunk_summary)
 
         self.chunks[new_chunk_id] = {

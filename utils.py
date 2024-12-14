@@ -18,21 +18,23 @@ Modify the response to the question using the provided references. Include preci
 """
 
 azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-azure_api_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+azure_deployment = os.getenv("AZURE_DEPLOYMENT_NAME")
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 def get_embedding(text, mod = "text-embedding-3-small"):
     client = AzureChatOpenAI(
-        model_name="gpt-4o-mini", 
-        api_key=azure_openai_api_key,
-        api_version="2024-08-01-preview",
-        azure_endpoint=azure_api_endpoint,
-        azure_deployment=os.getenv("AZURE_DEPLOYMENT_NAME")
-    )
+            model="gpt-4o-mini", 
+            api_key=azure_openai_api_key,
+            api_version="2024-08-01-preview",
+            azure_endpoint=azure_endpoint,
+            azure_deployment=azure_deployment
+        )
     response = client.embeddings.create(
         input=text,
         model=mod
     )
 
+    print(response)
     return response.data[0].embedding
 
 def fetch_texts(n4j):
