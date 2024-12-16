@@ -6,7 +6,9 @@ from langchain.chains import create_extraction_chain
 from typing import Optional, List
 from langchain.chains import create_extraction_chain_pydantic
 from pydantic import BaseModel
-from langchain import hub
+from langchain import hub # The `langchainhub sdk` is deprecated. Please use the `langsmith sdk` instead
+# from langsmith import hub
+from langsmith import Client
 import os
 from dataloader import load_high
 from agentic_chunker import AgenticChunker
@@ -28,7 +30,8 @@ def get_propositions(text, runnable, extraction_chain):
 def run_chunk(essay):
 
     # pulls a pre-defined LangChain prompt template named "wfh/proposal-indexing"
-    obj = hub.pull("wfh/proposal-indexing")
+    client = Client()
+    obj = client.pull_prompt("wfh/proposal-indexing")
     #llm = ChatOpenAI(model='gpt-4o-mini', openai_api_key = os.getenv("OPENAI_API_KEY"))
     # Use Azure OpenAI
     azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
@@ -46,7 +49,7 @@ def run_chunk(essay):
     runnable = obj | llm
 
     # Extraction
-    extraction_chain = create_extraction_chain_pydantic(pydantic_schema=Sentences, llm=llm)
+    extraction_chain = create_extraction_chain_pydantic(pydantic_schema=Sentences, llm=llm) # function not defined // gives error when running run.py
 
     paragraphs = essay.split("\n\n")
 
