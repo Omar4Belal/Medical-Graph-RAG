@@ -4,7 +4,7 @@ import uuid
 import os
 from typing import Optional
 from pydantic import BaseModel
-from langchain.chains import create_extraction_chain_pydantic
+from langchain.chains.openai_functions import create_extraction_chain_pydantic
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -368,22 +368,22 @@ if __name__ == "__main__":
         "One of the most important things that I didn't understand about the world as a child was the degree to which the returns for performance are superlinear.",
         'Teachers and coaches implicitly told us that the returns were linear.',
         "I heard a thousand times that 'You get out what you put in.'",
-        # 'Teachers and coaches meant well.',
-        # "The statement that 'You get out what you put in' is rarely true.",
-        # "If your product is only half as good as your competitor's product, you do not get half as many customers.",
-        # "You get no customers if your product is only half as good as your competitor's product.",
-        # 'You go out of business if you get no customers.',
-        # 'The returns for performance are superlinear in business.',
-        # 'Some people think the superlinear returns for performance are a flaw of capitalism.',
-        # 'Some people think that changing the rules of capitalism would stop the superlinear returns for performance from being true.',
-        # 'Superlinear returns for performance are a feature of the world.',
-        # 'Superlinear returns for performance are not an artifact of rules that humans have invented.',
-        # 'The same pattern of superlinear returns is observed in fame.',
-        # 'The same pattern of superlinear returns is observed in power.',
-        # 'The same pattern of superlinear returns is observed in military victories.',
-        # 'The same pattern of superlinear returns is observed in knowledge.',
-        # 'The same pattern of superlinear returns is observed in benefit to humanity.',
-        # 'In fame, power, military victories, knowledge, and benefit to humanity, the rich get richer.'
+        'Teachers and coaches meant well.',
+        "The statement that 'You get out what you put in' is rarely true.",
+        "If your product is only half as good as your competitor's product, you do not get half as many customers.",
+        "You get no customers if your product is only half as good as your competitor's product.",
+        'You go out of business if you get no customers.',
+        'The returns for performance are superlinear in business.',
+        'Some people think the superlinear returns for performance are a flaw of capitalism.',
+        'Some people think that changing the rules of capitalism would stop the superlinear returns for performance from being true.',
+        'Superlinear returns for performance are a feature of the world.',
+        'Superlinear returns for performance are not an artifact of rules that humans have invented.',
+        'The same pattern of superlinear returns is observed in fame.',
+        'The same pattern of superlinear returns is observed in power.',
+        'The same pattern of superlinear returns is observed in military victories.',
+        'The same pattern of superlinear returns is observed in knowledge.',
+        'The same pattern of superlinear returns is observed in benefit to humanity.',
+        'In fame, power, military victories, knowledge, and benefit to humanity, the rich get richer.'
     ]
     
     ac.add_propositions(propositions)
