@@ -7,7 +7,7 @@ import uuid
 from summerize import process_chunks
 import openai
 from openai import AzureOpenAI
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings
 
 sys_prompt_one = """
 Please answer the question using insights supported by provided graph-based data relevant to medical information.
@@ -22,20 +22,21 @@ azure_deployment = os.getenv("AZURE_DEPLOYMENT_NAME")
 azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 def get_embedding(text, mod = "text-embedding-3-small"):
-    client = AzureChatOpenAI(
-            model="gpt-4o-mini", 
-            api_key=azure_openai_api_key,
-            api_version="2024-08-01-preview",
+    try:
+        embeddings_client = AzureOpenAIEmbeddings(
+            model=mod,
+            deployment=azure_deployment,
+            openai_api_key=azure_openai_api_key,
             azure_endpoint=azure_endpoint,
-            azure_deployment=azure_deployment
+            openai_api_version="2024-08-01-preview"
         )
-    response = client.embeddings.create(
-        input=text,
-        model=mod
-    )
+        response = embeddings_client.embed_query(text)
+        print(response)
+        return response
+    except Exception as e:
+        print("Embedding error:", e)
+        return None
 
-    print(response)
-    return response.data[0].embedding
 
 def fetch_texts(n4j):
     # Fetch the text for each node
